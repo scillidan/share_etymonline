@@ -9,7 +9,7 @@ Data from `etymonline.zip` (StarDict) on [Free StarDict dictionaries](https://tu
 Download `.zip` from [Releases](https://github.com/scillidan/share_etymonline/releases):
 - For GoldenDict, use `*-stardict-*.zip`.
 - For sdcv, use `*-stardict-html2ansi-*.zip`.
-- For Yomitan, use `*-yomitan-*.zip`. Just a conversion file, I don't to know well this format yet.
+- For Yomichan/Yomitan, use `*-yomichan-*.zip`. Just a conversion file, I don't to know well this format yet.
 
 See preview screenshot [here](asset/).
 
