@@ -42,7 +42,7 @@ jobs:
         pyglossary ./etymonline/stardict.ifo ./etymonline-tabfile.txt --read-format=Stardict --write-format=Tabfile
         python text_format.py etymonline-tabfile.txt etymonline-tabfile-formatted.txt
         pyglossary ./etymonline-tabfile-formatted.txt ./etymonline-stardict-mergesyns-ClearStyle --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
-        pyglossary ./etymonline-tabfile-formatted.txt ./etymonline-yomichan-demo --read-format=Tabfile --write-format=Yomichan --name=etymonline
+        pyglossary ./etymonline-tabfile-formatted.txt ./etymonline-yomichan.zip --read-format=Tabfile --write-format=Yomichan --name=etymonline
         python html2ansi.py etymonline-tabfile-formatted.txt etymonline-tabfile-formatted-html2ansi.txt
         pyglossary ./etymonline-tabfile-formatted-html2ansi.txt ./etymonline-stardict-mergesyns-ClearStyle-html2ansi --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
 
