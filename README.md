@@ -7,7 +7,7 @@ Data from `etymonline.zip` (StarDict) on [Free StarDict dictionaries](https://tu
 ## Usage
 
 1. Download files from [Releases](https://github.com/scillidan/share_etymonline/releases).
-2. Use them in GoldenDict (StarDict), sdcv, Yomichan/Yomitan.
+2. Use them in GoldenDict (StarDict), sdcv, dictd, Yomichan/Yomitan.
 3. See preview screenshot [here](asset/).
 
 ### sdcv
@@ -21,4 +21,32 @@ ln -sfn $(pwd)/sdcv-awk.sh ~/.local/bin/sdcv-awk
 sdcv --use-dict etymonline -n <word> | sdcv-awk
 # Uninstall
 rm ~/.local/bin/sdcv-awk
+```
+
+### dictd
+
+```sh
+# Arch
+sudo cp etymonline-dictd.* /usr/share/dictd/
+sudo vim /etc/dict/dictd.conf
+```
+
+```
+# Add database
+database etymonline {
+	data /usr/share/dictd/etymonline-dictd.dict.dz
+	index /usr/share/dictd/etymonline-dictd.index
+}
+```
+
+```sh
+sudo systemctl restart dictd.service
+```
+
+```sh
+chmod +x ./dictd-awk.sh
+# Install
+ln -sfn $(pwd)/dictd-awk.sh ~/.local/bin/dictd-awk
+# Usage
+dict --host localhost --port 2528 --database etymonline -n <word> | dictd-awk
 ```
