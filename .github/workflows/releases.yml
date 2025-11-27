@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "*"
+  workflow_dispatch:
+
 permissions:
   contents: write
 
@@ -39,12 +41,20 @@ jobs:
 
     - name: Run pyglossary and related processing
       run: |
-        pyglossary ./etymonline/stardict.ifo ./etymonline-tabfile.txt --read-format=Stardict --write-format=Tabfile
-        python text_format.py etymonline-tabfile.txt etymonline-tabfile-formatted.txt
-        pyglossary ./etymonline-tabfile-formatted.txt ./etymonline-stardict-mergesyns-ClearStyle --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
-        pyglossary ./etymonline-tabfile-formatted.txt ./etymonline-yomichan.zip --read-format=Tabfile --write-format=Yomichan --name=etymonline
-        python html2ansi.py etymonline-tabfile-formatted.txt etymonline-tabfile-formatted-html2ansi.txt
-        pyglossary ./etymonline-tabfile-formatted-html2ansi.txt ./etymonline-stardict-mergesyns-ClearStyle-html2ansi --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
+        # tabfile
+        pyglossary ./etymonline/stardict.ifo ./_etymonline.txt --read-format=Stardict --write-format=Tabfile
+        # tabfile-formatted
+        python text_format.py _etymonline.txt _etymonline-formatted.txt
+        # stardict-mergesync
+        pyglossary ./_etymonline-formatted.txt ./etymonline-stardict-mergesyns --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
+        # tabfile-formatted-html2ansi
+        python html2ansi.py _etymonline-formatted.txt _etymonline-formatted-html2ansi.txt
+        # sdcv
+        pyglossary ./_etymonline-formatted-html2ansi.txt ./etymonline-sdcv --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
+        # dictd
+        pyglossary ./_etymonline-formatted-html2ansi.txt ./etymonline-dictd --read-format=Tabfile --write-format=DictOrg --write-options="dictzip=true" --name=etymonline
+        # yomichan
+        pyglossary ./_etymonline-formatted.txt ./etymonline-yomichan.zip --read-format=Tabfile --write-format=Yomichan --name=etymonline
 
     - name: Create zip files for Stardict sets
       run: |
@@ -71,6 +81,10 @@ jobs:
           zip -j "${prefix}.zip" "$prefix.ifo" "$dict_file" "$prefix.idx"
         done
 
+    - name: Create zip files for Dictd sets
+      run: |
+        zip -j "etymonline-dictd.zip" "etymonline-dictd.dict.dz" "etymonline-dictd.index"
+
     - name: Pre-release
       run: echo "${{ github.sha }}" > Release.txt
 
@@ -86,6 +100,6 @@ jobs:
         name: ${{ steps.tag_short.outputs.short }}
         files: |
           etymonline-*.zip
-          etymonline-*.txt
+          _etymonline*.txt
           Release.txt
 
