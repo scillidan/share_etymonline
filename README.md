@@ -18,7 +18,7 @@ chmod +x ./sdcv-awk.sh
 # Install
 ln -sfn $(pwd)/sdcv-awk.sh ~/.local/bin/sdcv-awk
 # Usage
-sdcv --use-dict etymonline -n <word> | sdcv-awk
+sdcv --color --use-dict etymonline -n <word> | sdcv-awk
 # Uninstall
 rm ~/.local/bin/sdcv-awk
 ```
@@ -27,7 +27,8 @@ rm ~/.local/bin/sdcv-awk
 
 ```sh
 # Arch
-sudo cp etymonline-dictd.* /usr/share/dictd/
+unzip etymonline-dictd.zip
+sudo cp etymonline-dictd.{index,dict.dz} /usr/share/dictd/
 sudo vim /etc/dict/dictd.conf
 ```
 
