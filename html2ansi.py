@@ -4,7 +4,7 @@ import sys
 import re
 
 def convert(text):
-    replacements = {
+    convert_dict = {
         "<blockquote>": "    ",
         "</blockquote>": "",
         "<br>": r"\n",
@@ -14,7 +14,7 @@ def convert(text):
         "</i>": "\033[0m",
     }
 
-    for html, ansi in replacements.items():
+    for html, ansi in convert_dict.items():
         text = text.replace(html, ansi)
 
     # Replace an HTML link tag with ANSI-escaped underlined blue text
