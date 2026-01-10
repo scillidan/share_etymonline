@@ -7,7 +7,7 @@ Data from `etymonline.zip` (StarDict) on [Free StarDict dictionaries](https://tu
 ## Usage
 
 1. Download files from [Releases](https://github.com/scillidan/share_etymonline/releases).
-2. Use them in GoldenDict (StarDict format), sdcv, dictd, Yomichan/Yomitan.
+2. Use them in GoldenDict (StarDict format), sdcv, dictd.
 3. See preview screenshot [here](asset/).
 
 ### sdcv
