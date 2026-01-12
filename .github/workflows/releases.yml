@@ -27,14 +27,16 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Install pyglossary
-      run: pip install pyglossary lxml beautifulsoup4 python-idzip tqdm
+    - name: Install pyglossary and dependencies
+      run: pip install pyglossary lxml beautifulsoup4 python-idzip tqdm pyicu 
 
     - name: (etymonline) Download etymonline.zip from FireDict
       run:  curl -LO "http://tovotu.de/data/stardict/etymonline.zip"
 
     - name: (etymonline) Decompress archive
-      run:  unzip etymonline.zip
+      run: |
+        unzip etymonline.zip
+        rm etymonline.zip
 
     - name: Convert with pyglossary and python scripts
       run: |
@@ -58,6 +60,9 @@ jobs:
 
         # yomichan
         pyglossary ./_etymonline-formatted.txt ./etymonline-yomichan.zip --read-format=Tabfile --write-format=Yomichan --name=etymonline
+
+        # aard2
+        pyglossary ./_etymonline-formatted.txt ./etymonline-aard2.slob --read-format=Tabfile --write-format=Aard2Slob --name=etymonline
 
     - name: Create ZIP files of Stardict
       run: |
@@ -92,7 +97,7 @@ jobs:
 
     - name: Generate SHA256 checksums
       run: |
-        for file in ./_*.txt ./etymonline-*.zip;
+        for file in _*.txt *.zip *.slob;
         do
           if [ -f "$file" ]; then
             sha256sum "$file" > "$file.sha256";
@@ -108,4 +113,5 @@ jobs:
         name: ${{ env.VERSION }}
         files: |
           _*.txt
-          etymonline-*.zip
+          *.zip
+          *.slob
