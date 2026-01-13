@@ -72,13 +72,13 @@ jobs:
         pyglossary ./_etymonline-${version}-formatted-html2ansi.txt ./etymonline-sdcv --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
 
         # dictd
-        pyglossary ./_etymonline-${version}-formatted-html2ansi.txt ./etymonline-dictd --read-format=Tabfile --write-format=DictOrg --write-options="dictzip=true" --name=etymonline
+        pyglossary ./_etymonline-${version}-formatted-html2ansi.txt ./etymonline-${version}-dictd --read-format=Tabfile --write-format=DictOrg --write-options="dictzip=true" --name=etymonline
 
         # yomichan
-        pyglossary ./_etymonline-${version}-formatted.txt ./etymonline-yomichan.zip --read-format=Tabfile --write-format=Yomichan --name=etymonline
+        pyglossary ./_etymonline-${version}-formatted.txt ./etymonline-${version}-yomichan.zip --read-format=Tabfile --write-format=Yomichan --name=etymonline
 
         # aard2
-        pyglossary ./_etymonline-${version}-formatted.txt ./etymonline-aard2.slob --read-format=Tabfile --write-format=Aard2Slob --name=etymonline
+        pyglossary ./_etymonline-${version}-formatted.txt ./etymonline-${version}-aard2.slob --read-format=Tabfile --write-format=Aard2Slob --name=etymonline
 
     - name: ZIP Stardict
       run: |
