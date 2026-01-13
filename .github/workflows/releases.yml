@@ -103,10 +103,9 @@ jobs:
 
     - name: Release
       uses: softprops/action-gh-release@v2
-      if: github.ref_type == 'tag'
       with:
-        tag_name: ${{ env.VERSION }}
-        name: ${{ env.VERSION }}
+        tag_name: ${{ steps.get_version.outputs.version }}
+        name: ${{ steps.get_version.outputs.version }}
         files: |
           _*.txt
           *.zip
