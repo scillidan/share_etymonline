@@ -5,6 +5,11 @@ on:
     tags:
       - "*"
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -17,6 +22,16 @@ jobs:
     - name: Checkout repositoryI
       uses: actions/checkout@v4
 
+    - name: Determine version
+      id: get_version
+      run: |
+        if [[ "${{ github.event_name }}" == "push" ]]; then
+          echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        fi
+        echo "version: ${{ steps.get_version.outputs.version }}"
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -28,7 +43,7 @@ jobs:
         python-version: "3.11"
 
     - name: Install pyglossary and dependencies
-      run: pip install pyglossary lxml beautifulsoup4 python-idzip tqdm pyicu 
+      run: pip install pyglossary lxml beautifulsoup4 python-idzip tqdm pyicu
 
     - name: (etymonline) Download etymonline.zip from FireDict
       run:  curl -LO "http://tovotu.de/data/stardict/etymonline.zip"
@@ -40,69 +55,50 @@ jobs:
 
     - name: Convert with pyglossary and python scripts
       run: |
+        version="${{ steps.get_version.outputs.version }}"
         # tabfile
-        pyglossary ./etymonline/stardict.ifo ./_etymonline.txt --read-format=Stardict --write-format=Tabfile
+        pyglossary ./etymonline/stardict.ifo ./_etymonline-${version}.txt --read-format=Stardict --write-format=Tabfile
 
         # tabfile-formatted
-        python text_format.py _etymonline.txt _etymonline-formatted.txt
+        python text_format.py _etymonline-${version}.txt _etymonline-${version}-formatted.txt
 
         # stardict-mergesync
-        pyglossary ./_etymonline-formatted.txt ./etymonline-stardict-mergesyns --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
+        pyglossary ./_etymonline-${version}-formatted.txt ./etymonline-${version}-stardict-mergesyns --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
 
         # tabfile-formatted-html2ansi
-        python html2ansi.py _etymonline-formatted.txt _etymonline-formatted-html2ansi.txt
+        python html2ansi.py _etymonline-${version}-formatted.txt _etymonline-${version}-formatted-html2ansi.txt
 
         # sdcv
-        pyglossary ./_etymonline-formatted-html2ansi.txt ./etymonline-sdcv --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
+        pyglossary ./_etymonline-${version}-formatted-html2ansi.txt ./etymonline-sdcv --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
 
         # dictd
-        pyglossary ./_etymonline-formatted-html2ansi.txt ./etymonline-dictd --read-format=Tabfile --write-format=DictOrg --write-options="dictzip=true" --name=etymonline
+        pyglossary ./_etymonline-${version}-formatted-html2ansi.txt ./etymonline-dictd --read-format=Tabfile --write-format=DictOrg --write-options="dictzip=true" --name=etymonline
 
         # yomichan
-        pyglossary ./_etymonline-formatted.txt ./etymonline-yomichan.zip --read-format=Tabfile --write-format=Yomichan --name=etymonline
+        pyglossary ./_etymonline-${version}-formatted.txt ./etymonline-yomichan.zip --read-format=Tabfile --write-format=Yomichan --name=etymonline
 
         # aard2
-        pyglossary ./_etymonline-formatted.txt ./etymonline-aard2.slob --read-format=Tabfile --write-format=Aard2Slob --name=etymonline
+        pyglossary ./_etymonline-${version}-formatted.txt ./etymonline-aard2.slob --read-format=Tabfile --write-format=Aard2Slob --name=etymonline
 
-    - name: Create ZIP files of Stardict
+    - name: ZIP Stardict
       run: |
         for base in *.ifo; do
           prefix="${base%.ifo}"
-          if [[ ! -f "$prefix.ifo" ]]; then
-            echo "Skipping $prefix, missing $prefix.ifo"
-            continue
-          fi
-          if [[ ! -f "$prefix.idx" ]]; then
-            echo "Skipping $prefix, missing $prefix.idx"
-            continue
-          fi
-          dict_file=""
-          if [[ -f "$prefix.dict.dz" ]]; then
-            dict_file="$prefix.dict.dz"
-          elif [[ -f "$prefix.dict" ]]; then
-            dict_file="$prefix.dict"
-          else
-            echo "Skipping $prefix, missing $prefix.dict.dz or $prefix.dict"
-            continue
-          fi
-          echo "Creating ${prefix}.zip from $prefix.ifo, $dict_file, $prefix.idx"
-          zip -j "${prefix}.zip" "$prefix.ifo" "$dict_file" "$prefix.idx"
+          zip -j "${prefix}.zip" "$prefix.ifo" "$prefix.dict" "$prefix.idx" 2>/dev/null || true
         done
 
-    - name: Create ZIP files of dictd
+    - name: ZIP dictd
       run: |
-        zip -j "etymonline-dictd.zip" \
-          "etymonline-dictd.dict.dz" \
-          "etymonline-dictd.index"
+        version="${{ steps.get_version.outputs.version }}"
+        prefix=etymonline
+        zip -j "${prefix}-${version}-dictd.zip" \
+          "${prefix}-${version}-dictd.dict.dz" \
+          "${prefix}-${version}-dictd.index"
 
     - name: Generate SHA256 checksums
       run: |
-        for file in _*.txt *.zip *.slob;
-        do
-          if [ -f "$file" ]; then
-            sha256sum "$file" > "$file.sha256";
-            echo "Generated checksum for $file";
-          fi
+        for file in _*.txt *.zip *.slob; do
+          sha256sum "$file" > "$file.sha256";
         done
 
     - name: Release
