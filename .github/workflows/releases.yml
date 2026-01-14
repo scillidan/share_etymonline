@@ -80,24 +80,23 @@ jobs:
         # aard2
         pyglossary ./_etymonline-${version}-formatted.txt ./etymonline-${version}-aard2.slob --read-format=Tabfile --write-format=Aard2Slob --name=etymonline
 
-    - name: ZIP Stardict
+    - name: ZIP stardict
       run: |
         for base in *.ifo; do
           prefix="${base%.ifo}"
-          zip -j "${prefix}.zip" "$prefix.ifo" "$prefix.dict" "$prefix.idx" 2>/dev/null || true
+          zip -j "${prefix}.zip" "$prefix".{ifo,dict,idx,syn} 2>/dev/null
         done
 
     - name: ZIP dictd
       run: |
-        version="${{ steps.get_version.outputs.version }}"
-        prefix=etymonline
-        zip -j "${prefix}-${version}-dictd.zip" \
-          "${prefix}-${version}-dictd.dict.dz" \
-          "${prefix}-${version}-dictd.index"
+        for base in *.index; do
+          prefix="${base%.index}"
+          zip -j "${prefix}.zip" "$prefix".{dict.dz,index} 2>/dev/null
+        done
 
     - name: Generate SHA256 checksums
       run: |
-        for file in _*.txt *.zip *.slob; do
+        for file in *.{txt,zip,slob}; do
           sha256sum "$file" > "$file.sha256";
         done
 
@@ -107,6 +106,4 @@ jobs:
         tag_name: ${{ steps.get_version.outputs.version }}
         name: ${{ steps.get_version.outputs.version }}
         files: |
-          _*.txt
-          *.zip
-          *.slob
+          *.{txt,zip,slob}
