@@ -56,29 +56,32 @@ jobs:
     - name: Convert with pyglossary and python scripts
       run: |
         version="${{ steps.get_version.outputs.version }}"
+        filename=etymonline-${version}
+        dictname=etymonline
+
         # tabfile
-        pyglossary ./etymonline/stardict.ifo ./_etymonline-${version}.txt --read-format=Stardict --write-format=Tabfile
+        pyglossary ./etymonline/stardict.ifo ./_${filename}.txt --read-format=Stardict --write-format=Tabfile
 
         # tabfile-formatted
-        python text_format.py _etymonline-${version}.txt _etymonline-${version}-formatted.txt
+        python text_format.py _${filename}.txt _${filename}-formatted.txt
 
         # stardict-mergesync
-        pyglossary ./_etymonline-${version}-formatted.txt ./etymonline-${version}-stardict-mergesyns --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
+        pyglossary ./_${filename}-formatted.txt ./${filename}-stardict-mergesyns --read-format=Tabfile --write-format=StardictMergeSyns --name=${dictname}
 
         # tabfile-formatted-html2ansi
-        python html2ansi.py _etymonline-${version}-formatted.txt _etymonline-${version}-formatted-html2ansi.txt
+        python html2ansi.py _${filename}-formatted.txt _${filename}-formatted-html2ansi.txt
 
         # sdcv
-        pyglossary ./_etymonline-${version}-formatted-html2ansi.txt ./etymonline-sdcv --read-format=Tabfile --write-format=StardictMergeSyns --name=etymonline
+        pyglossary ./_${filename}-formatted-html2ansi.txt ./etymonline-sdcv --read-format=Tabfile --write-format=StardictMergeSyns --name=${dictname}
 
         # dictd
-        pyglossary ./_etymonline-${version}-formatted-html2ansi.txt ./etymonline-${version}-dictd --read-format=Tabfile --write-format=DictOrg --write-options="dictzip=true" --name=etymonline
+        pyglossary ./_${filename}-formatted-html2ansi.txt ./${filename}-dictd --read-format=Tabfile --write-format=DictOrg --write-options="dictzip=true" --name=${dictname}
 
         # yomichan
-        pyglossary ./_etymonline-${version}-formatted.txt ./etymonline-${version}-yomichan.zip --read-format=Tabfile --write-format=Yomichan --name=etymonline
+        pyglossary ./_${filename}-formatted.txt ./${filename}-yomichan.zip --read-format=Tabfile --write-format=Yomichan --name=${dictname}
 
         # aard2
-        pyglossary ./_etymonline-${version}-formatted.txt ./etymonline-${version}-aard2.slob --read-format=Tabfile --write-format=Aard2Slob --name=etymonline
+        pyglossary ./_${filename}-formatted.txt ./${filename}-aard2.slob --read-format=Tabfile --write-format=Aard2Slob --name=${dictname}
 
     - name: ZIP stardict
       run: |
@@ -91,7 +94,7 @@ jobs:
       run: |
         for base in *.index; do
           prefix="${base%.index}"
-          zip -j "${prefix}.zip" "$prefix".{dict.dz,index} 2>/dev/null
+          zip -j "${prefix}.zip" "$prefix".{index,dict.dz} 2>/dev/null
         done
 
     - name: Generate SHA256 checksums
