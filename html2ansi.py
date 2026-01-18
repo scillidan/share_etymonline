@@ -8,8 +8,8 @@ def convert(text):
         "<blockquote>": "    ",
         "</blockquote>": "",
         "<br>": r"\n",
-        '<font style="color:green">': "\033[32m",
-        "</font>": "\033[0m",
+        '<span style="color:green;">': "\033[32m",
+        "</span>": "\033[0m",
         '<i>': "\033[3m",
         "</i>": "\033[0m",
     }

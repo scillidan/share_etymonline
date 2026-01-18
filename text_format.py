@@ -38,7 +38,7 @@ def match_remove(text):
     return text
 
 def match_replace(text):
-    # Replace <span style="color: #47A">...</span> with <font style="color:green">...</font>
+    # Replace <span style="color: #47A">...</span> with <span style="color:green">...</span>
     source_color = "#47A"
     target_color = "green"
     color_pattern = re.compile(
@@ -48,7 +48,7 @@ def match_replace(text):
     def replace_span(match: re.Match) -> str:
         # Get the content inside the span
         content = match.group(1)
-        return f'<font style="color:{target_color}">{content}</font>'
+        return f'<span style="color:{target_color};">{content}</span>'
     return color_pattern.sub(replace_span, text)
 
 def match_convert(text):
