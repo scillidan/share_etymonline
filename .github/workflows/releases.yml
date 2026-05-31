@@ -20,7 +20,7 @@ jobs:
 
     steps:
     - name: Checkout repositoryI
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Determine version
       id: get_version
@@ -104,7 +104,7 @@ jobs:
         done
 
     - name: Release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         tag_name: ${{ steps.get_version.outputs.version }}
         name: ${{ steps.get_version.outputs.version }}
