@@ -1,4 +1,4 @@
-name: Create Releases
+name: Release
 
 on:
   push:
@@ -19,8 +19,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repositoryI
-      uses: actions/checkout@v6
+    - name: Checkout repository
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v6
+      with:
+        persist-credentials: false
 
     - name: Determine version
       id: get_version
@@ -30,7 +32,6 @@ jobs:
         elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
         fi
-        echo "version: ${{ steps.get_version.outputs.version }}"
 
     - name: Install system dependencies
       run: |
@@ -38,7 +39,7 @@ jobs:
         sudo apt-get install -y zip
 
     - name: Set up Python
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@8d9ed9ac5b5349cb32a66bb81d1a1499cddbe391  # v5
       with:
         python-version: "3.12"
 
@@ -46,7 +47,7 @@ jobs:
       run: pip install pyglossary lxml beautifulsoup4 python-idzip tqdm pyicu
 
     - name: (etymonline) Download etymonline.zip from FireDict
-      run:  curl -LO "http://tovotu.de/data/stardict/etymonline.zip"
+      run: curl -LO "http://tovotu.de/data/stardict/etymonline.zip"
 
     - name: (etymonline) Decompress archive
       run: |
@@ -54,33 +55,18 @@ jobs:
         rm etymonline.zip
 
     - name: Convert with pyglossary and python scripts
+      env:
+        VERSION: ${{ steps.get_version.outputs.version }}
       run: |
-        version="${{ steps.get_version.outputs.version }}"
-        filename=etymonline-${version}
+        filename=etymonline-${VERSION}
         dictname=etymonline
-
-        # tabfile
         pyglossary ./etymonline/stardict.ifo ./_${filename}.txt --read-format=Stardict --write-format=Tabfile
-
-        # tabfile-formatted
         python text_format.py _${filename}.txt _${filename}-formatted.txt
-
-        # stardict-mergesync
         pyglossary ./_${filename}-formatted.txt ./${filename}-stardict-mergesyns --read-format=Tabfile --write-format=StardictMergeSyns --name=${dictname}
-
-        # tabfile-formatted-html2ansi
         python html2ansi.py _${filename}-formatted.txt _${filename}-formatted-html2ansi.txt
-
-        # sdcv
         pyglossary ./_${filename}-formatted-html2ansi.txt ./etymonline-sdcv --read-format=Tabfile --write-format=StardictMergeSyns --name=${dictname}
-
-        # dictd
         pyglossary ./_${filename}-formatted-html2ansi.txt ./${filename}-dictd --read-format=Tabfile --write-format=DictOrg --write-options="dictzip=true" --name=${dictname}
-
-        # yomichan
         pyglossary ./_${filename}-formatted.txt ./${filename}-yomichan.zip --read-format=Tabfile --write-format=Yomichan --name=${dictname}
-
-        # aard2
         pyglossary ./_${filename}-formatted.txt ./${filename}-aard2.slob --read-format=Tabfile --write-format=Aard2Slob --name=${dictname}
 
     - name: ZIP stardict
@@ -103,10 +89,12 @@ jobs:
           sha256sum "$file" > "$file.sha256";
         done
 
-    - name: Release
-      uses: softprops/action-gh-release@v3
-      with:
-        tag_name: ${{ steps.get_version.outputs.version }}
-        name: ${{ steps.get_version.outputs.version }}
-        files: |
-          *.{txt,zip,slob}
+    - name: Create GitHub Release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VERSION: ${{ steps.get_version.outputs.version }}
+      run: |
+        gh release create "$VERSION" \
+          *.txt *.zip *.slob \
+          --title "$VERSION" \
+          --generate-notes
