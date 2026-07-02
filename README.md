@@ -1,6 +1,6 @@
 # share_etymonline
 
-[![Create Releases](https://github.com/scillidan/share_etymonline/actions/workflows/releases.yml/badge.svg)](https://github.com/scillidan/share_etymonline/actions/workflows/releases.yml)
+[![Release](https://github.com/scillidan/share_etymonline/actions/workflows/release.yml/badge.svg)](https://github.com/scillidan/share_etymonline/actions/workflows/release.yml)
 
 Data from `etymonline.zip` (StarDict) on [Free StarDict dictionaries](https://tuxor1337.frama.io/firedict/dictionaries.html). I can't get newer data from [Online Etymology Dictionary](http://etymonline.com) using [dictmaster](https://framagit.org/tuxor1337/dictmaster).
 
